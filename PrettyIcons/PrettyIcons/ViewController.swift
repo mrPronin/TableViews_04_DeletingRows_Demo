@@ -23,49 +23,76 @@
 import UIKit
 
 class ViewController: UIViewController {
-
-  var iconSets = [IconSet]()
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
     
-    iconSets = IconSet.iconSets()
-    automaticallyAdjustsScrollViewInsets = false
-  }
-
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
+    // MARK: - Vars
+    var iconSets = [IconSet]()
+    
+    // MARK: - Outlets
+    @IBOutlet weak var tableView: UITableView!
+    
+    // MARK: - UIViewController
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        iconSets = IconSet.iconSets()
+        navigationItem.rightBarButtonItem = editButtonItem()
+        automaticallyAdjustsScrollViewInsets = false
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
 }
 
 extension ViewController : UITableViewDataSource {
-  
-  func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-    return iconSets.count
-  }
-  
-  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return iconSets[section].icons.count
-  }
-  
-  func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return iconSets[section].name
-  }
-  
-  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("IconCell", forIndexPath: indexPath)
-    let set = iconSets[indexPath.section]
-    let icon = set.icons[indexPath.row]
     
-    cell.textLabel?.text = icon.title
-    cell.detailTextLabel?.text = icon.subtitle
-    
-    if let imageView = cell.imageView, iconImage = icon.image {
-      imageView.image = iconImage
+    override func setEditing(editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        if editing {
+            tableView.setEditing(true, animated: true)
+        } else {
+            tableView.setEditing(false, animated: true)
+        }
     }
-
-    return cell
-  }
-  
+    
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return iconSets.count
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return iconSets[section].icons.count
+    }
+    
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return iconSets[section].name
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("IconCell", forIndexPath: indexPath)
+        let set = iconSets[indexPath.section]
+        let icon = set.icons[indexPath.row]
+        
+        cell.textLabel?.text = icon.title
+        cell.detailTextLabel?.text = icon.subtitle
+        
+        if let imageView = cell.imageView, iconImage = icon.image {
+            imageView.image = iconImage
+        }
+        
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        if editingStyle == .Delete {
+            let set = iconSets[indexPath.section]
+            set.icons.removeAtIndex(indexPath.row)
+            
+            tableView.beginUpdates()
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+            tableView.endUpdates()
+        }
+    }
+    
 }
